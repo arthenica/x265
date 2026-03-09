@@ -420,9 +420,9 @@ void RateControl::initVBV(const SPS& sps)
         vbvBufferSize = hrd->cpbSizeValue << (hrd->cpbSizeScale + CPB_SHIFT);
         vbvMaxBitrate = hrd->bitRateValue << (hrd->bitRateScale + BR_SHIFT);
     }
-    m_bufferRate = vbvMaxBitrate / m_fps;
-    m_vbvMaxRate = vbvMaxBitrate;
-    m_bufferSize = vbvBufferSize;
+    m_bufferRate = static_cast<double>(vbvMaxBitrate) / m_fps;
+    m_vbvMaxRate = static_cast<double>(vbvMaxBitrate);
+    m_bufferSize = static_cast<double>(vbvBufferSize);
     m_singleFrameVbv = m_bufferRate * 1.1 > m_bufferSize;
 
     if (m_param->rc.vbvBufferInit > 1.)
@@ -853,9 +853,9 @@ void RateControl::reconfigureRC()
         }
         uint64_t vbvBufferSize = m_param->rc.vbvBufferSize * 1000ULL;
         uint64_t vbvMaxBitrate = m_param->rc.vbvMaxBitrate * 1000ULL;
-        m_bufferRate = vbvMaxBitrate / m_fps;
-        m_vbvMaxRate = vbvMaxBitrate;
-        m_bufferSize = vbvBufferSize;
+        m_bufferRate = static_cast<double>(vbvMaxBitrate) / m_fps;
+        m_vbvMaxRate = static_cast<double>(vbvMaxBitrate);
+        m_bufferSize = static_cast<double>(vbvBufferSize);
         m_singleFrameVbv = m_bufferRate * 1.1 > m_bufferSize;
     }
     if (m_param->rc.rateControlMode == X265_RC_CRF)
@@ -910,10 +910,10 @@ void RateControl::initHRD(SPS& sps)
 
     // normalize HRD size and rate to the value / scale notation
     hrd->bitRateScale = x265_clip3(0, 15, calcScale(vbvMaxBitrate) - BR_SHIFT);
-    hrd->bitRateValue = (vbvMaxBitrate >> (hrd->bitRateScale + BR_SHIFT));
+    hrd->bitRateValue = static_cast<uint32_t>(vbvMaxBitrate >> (hrd->bitRateScale + BR_SHIFT));
 
     hrd->cpbSizeScale = x265_clip3(0, 15, calcScale(vbvBufferSize) - CPB_SHIFT);
-    hrd->cpbSizeValue = (vbvBufferSize >> (hrd->cpbSizeScale + CPB_SHIFT));
+    hrd->cpbSizeValue = static_cast<uint32_t>(vbvBufferSize >> (hrd->cpbSizeScale + CPB_SHIFT));
     uint64_t bitRateUnscale = (uint64_t)hrd->bitRateValue << (hrd->bitRateScale + BR_SHIFT);
     uint64_t cpbSizeUnscale = (uint64_t)hrd->cpbSizeValue << (hrd->cpbSizeScale + CPB_SHIFT);
 
